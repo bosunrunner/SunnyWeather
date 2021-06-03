@@ -1,5 +1,6 @@
 package com.example.sunnyweather.ui.weather
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.Color
 import android.os.Build
@@ -13,6 +14,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.core.view.ViewCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -34,7 +36,8 @@ class WeatherActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // 使窗口和状态栏更加吻合
-        val decorView = window.decorView
+        translucentStatusBar(this,true)
+//        val decorView = window.decorView
 ////        这里被弃用了
 //        decorView.systemUiVisibility=View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
 //        window.statusBarColor= Color.TRANSPARENT
@@ -147,63 +150,35 @@ class WeatherActivity : AppCompatActivity() {
         weatherLayout.visibility=View.VISIBLE
 
     }
-/* 设置状态栏的颜色
-    private fun initWindows() {
-        val window: Window = window
-        val color = resources.getColor(R.color.wechatBgColor)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            window.clearFlags(
-                WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
-                        or WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
-            )
-            window.getDecorView().setSystemUiVisibility(
-                (View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        or View.SYSTEM_UI_FLAG_LAYOUT_STABLE)
-            )
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-            //设置状态栏颜色
-            window.setStatusBarColor(color)
-            //设置导航栏颜色
-            window.setNavigationBarColor(resources.getColor(R.color.footerBgColor))
-            val contentView = (findViewById<View>(android.R.id.content) as ViewGroup)
-            val childAt = contentView.getChildAt(0)
-            if (childAt != null) {
-                childAt.fitsSystemWindows = true
-            }
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            //透明状态栏
+
+    // 将状态栏改变成透明颜色
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    fun translucentStatusBar(activity: Activity, hideStatusBarBackground: Boolean) {
+        val window = activity.window
+        //添加Flag把状态栏设为可绘制模式
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        if (hideStatusBarBackground) {
+            //如果为全透明模式，取消设置Window半透明的Flag
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+            //设置状态栏为透明
+            window.statusBarColor = Color.TRANSPARENT
+            //设置window的状态栏不可见
+            window.decorView.systemUiVisibility =
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+        } else {
+            //如果为半透明模式，添加设置Window半透明的Flag
             window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-            //透明导航栏
-            window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
-            //设置contentview为fitsSystemWindows
-            val contentView = findViewById<View>(android.R.id.content) as ViewGroup
-            val childAt = contentView.getChildAt(0)
-            if (childAt != null) {
-                childAt.fitsSystemWindows = true
-            }
-            //给statusbar着色
-            val view = View(this)
-            view.layoutParams =
-                ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    getStatusBarHeight(this)
-                )
-            view.setBackgroundColor(color)
-            contentView.addView(view)
+            //设置系统状态栏处于可见状态
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && useStatusBarColor) { //android6.0以后可以对状态栏文字颜色和图标进行修改
-            getWindow().decorView.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        //view不根据系统窗口来调整自己的布局
+        val mContentView = window.findViewById(Window.ID_ANDROID_CONTENT) as ViewGroup
+        val mChildView = mContentView.getChildAt(0)
+        if (mChildView != null) {
+            ViewCompat.setFitsSystemWindows(mChildView, false)
+            ViewCompat.requestApplyInsets(mChildView)
         }
     }
 
-    private fun getStatusBarHeight(context: Context): Int {
-        // 获得状态栏高度
-        val resourceId = context.resources.getIdentifier("status_bar_height", "dimen", "android")
-        return context.resources.getDimensionPixelSize(resourceId)
-    }
-
- */
 
 }
